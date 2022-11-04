@@ -13,11 +13,9 @@ Using [ajfriesen/ESPHome-AirGradient](https://github.com/ajfriesen/ESPHome-AirGr
 
 ## How it Works
 
-If you're using the official AirGradient Arduino sketch (`C02_PM_SHT_OLED_WIFI`), you can configure it to enable WiFi and send data to a remote server every 9 seconds (as it cycles through the display of PM2.5, CO2, temperature, and humidity values).
+If you're using one of the official [AirGradient Arduino firmwares](https://www.airgradient.com/open-airgradient/instructions/basic-setup-skills-and-equipment-needed-to-build-our-airgradient-diy-sensor/), you can configure it to enable WiFi and send data to a remote server every 9 seconds (as it cycles through the display of PM2.5, CO2, temperature, and humidity values).  By default, it sends a small JSON payload to AirGradient's servers, and you can monitor the data via their service.  As mentioned previously, their serivce is only free for between six and 24 months depending on which kit you purchased from them.
 
-By default, it sends a small JSON payload to AirGradient's servers, and you can monitor the data via their service.
-
-This sketch provides stats upon request to the prometheus server during scrapes. By changing the deviceId in this sketch, you can easily probe multiple AirGradient DIY sensors from Prometheus.
+Like [geerlingguy/airgradient-prometheus](https://github.com/geerlingguy/airgradient-prometheus), this sketch provides stats upon request to the Prometheus server during scrapes.  The twist I put on it was to leverage ESPHome's already tight integration with Home Assistant to also expose your sensors directly to your HA instance.  Additionally, as ESPHome supports wireless flashing over WiFi, future updates should not require you to take down your sensor to upgrade it.
 
 ## How to Use
 
