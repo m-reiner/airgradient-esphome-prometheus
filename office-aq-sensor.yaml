@@ -1,0 +1,138 @@
+esphome:
+# I left my name in the 'name:' field below, but feel free to change it to your own
+  name:  office-aq-sensor
+  platform: ESP8266
+  board: d1_mini
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "PleaseChangeMe"
+
+ota:
+  password: "PleaseChangeMe"
+
+# Create a switch for safe_mode in order to flash the device
+# Solution from this thread:
+# https://community.home-assistant.io/t/esphome-flashing-over-wifi-does-not-work/357352/1
+switch:
+  - platform: safe_mode
+    name: "Flash Mode (Safe Mode)"
+
+wifi:
+  networks:
+  - ssid: PleaseUpdateMe
+    password: PleaseUpdateMe
+# If you want your sensor to use a static IP on your network, un-comment and update the block below:
+#    manual_ip:
+#      static_ip: PleaseUpdateMe
+#      gateway: PleaseUpdateMe
+#      subnet: 255.255.255.0
+  reboot_timeout: 15min
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "PleaseUpdateMe"
+    password: "PleaseUpdateMe"
+
+captive_portal:
+
+i2c:
+  sda: D2
+  scl: D1
+
+font:
+  - file: "gfonts://Source+Code+Pro@Extra-Light"
+    id: roboto
+    size: 18
+
+display:
+  - platform: ssd1306_i2c
+    id: oled
+    model: "SSD1306 64x48"
+# The code below will create different "pages" containing sensor readings that will be displayed on the OLED screen 
+    pages:
+      - id: page1
+        lambda: |-
+          it.printf(0, 0, id(roboto), "CO2:");
+          it.printf(2, 24, id(roboto), "%.0fppm", id(co2).state);
+      - id: page2
+        lambda: |-
+          it.printf(0, 0, id(roboto), "PM25:");
+          it.printf(2, 24, id(roboto), "%.0f", id(pm25).state);
+      - id: page3
+        lambda: |-
+          it.printf(0, 0, id(roboto), "Hmdty:");
+          it.printf(2, 24, id(roboto), "%.0f", id(humidity).state);
+      - id: page4
+        lambda: |-
+          it.printf(0, 0, id(roboto), "Temp:");
+            it.printf(2, 24, id(roboto), "%.0fC", id(temp).state);
+
+# Activates a v1 (basic) web server to serve up the /metrics endpoint to Prometheus ("Prometheus" activated in the next section)
+web_server:
+  port: 9926
+  version: 1
+
+# Activates prometheus /metrics endpoint
+prometheus:
+
+interval:
+  - interval: 5s
+    then:
+# This will caouse the OLED screen to scroll through the four different pages defined above,
+#  displaying a different sensor reading every 5 seconds
+      - display.page.show_next: oled
+      - component.update: oled
+
+uart:
+  - rx_pin: D5
+    tx_pin: D6
+    baud_rate: 9600
+    id: uart1
+#    
+  - rx_pin: D4
+    tx_pin: D3
+    baud_rate: 9600
+    id: uart2
+
+sensor:
+  - platform: sht3xd
+    temperature:
+      id: temp
+      name: "Temperature"
+    humidity:
+      id: humidity
+      name: "Humidity"
+    address: 0x44
+    update_interval: 5s
+
+  - platform: pmsx003
+    # type can be PMSX003, PMS5003S, PMS5003T, PMS5003ST
+    # https://esphome.io/components/sensor/pmsx003.html
+    type: PMSX003
+    uart_id: uart1
+    pm_1_0:
+      id: pm10
+      name: "Particulate Matter <1.0µm Concentration"
+    pm_2_5:
+      id: pm25
+      name: "Particulate Matter <2.5µm Concentration"
+    update_interval: 60s
+    pm_10_0:
+      id: pm100
+      name: "Particulate Matter <10.0µm Concentration"
+# If you have a version of the PMS*003* sensor that supports formaldehyde, uncomment the below block
+#    formaldehyde:
+#      id: hcho
+#      name: "Formaldehyde (HCHO) concentration in µg per cubic meter"
+
+  - platform: senseair
+    uart_id: uart2
+    co2:
+      id: co2
+      name: "SenseAir CO2 Value"
+    update_interval: 60s
