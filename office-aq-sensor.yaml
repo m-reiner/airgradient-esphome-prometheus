@@ -24,19 +24,19 @@ switch:
 
 wifi:
   networks:
-  - ssid: PleaseUpdateMe
-    password: PleaseUpdateMe
+  - ssid: PleaseChangeMe
+    password: PleaseChangeMe
 # If you want your sensor to use a static IP on your network, un-comment and update the block below:
 #    manual_ip:
-#      static_ip: PleaseUpdateMe
-#      gateway: PleaseUpdateMe
+#      static_ip: PleaseChangeMe
+#      gateway: PleaseChangeMe
 #      subnet: 255.255.255.0
   reboot_timeout: 15min
 
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
-    ssid: "PleaseUpdateMe"
-    password: "PleaseUpdateMe"
+    ssid: "PleaseChangeMe"
+    password: "PleaseChangeMe"
 
 captive_portal:
 
